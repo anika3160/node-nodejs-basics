@@ -15,12 +15,12 @@ const spawnChildProcess = async (args) => {
     // Write your code here 
     if (args?.length && typeof args !== 'string') {
         const childProcess = spawn('node', [`${__dirname}/files/script.js`, ...args]);
-        childProcess.stdout.pipe(process.stdout);
         process.stdin.pipe(childProcess.stdin);
+        childProcess.stdout.pipe(process.stdout);
     } else {
         throw new Error('Function spawnChildProcess expects to receive an array')
     }
 };
 
 // Put your arguments in function call to test this functionality
-spawnChildProcess([1,3,7]);
+await spawnChildProcess([1,3,7]);
