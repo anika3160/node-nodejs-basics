@@ -18,11 +18,7 @@ const read = async () => {
     })
 
     readStream.on('error', (err) => {
-        if(err.code == 'ENOENT') {
-            console.log('File not found');
-        } else {
-            throw (err);
-        }
+        throw (err);
     })
 };
 

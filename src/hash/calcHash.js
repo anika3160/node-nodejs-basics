@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
