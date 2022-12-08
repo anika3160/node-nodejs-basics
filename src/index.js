@@ -1,7 +1,6 @@
 import { stdin, stdout } from 'node:process';
 import path from 'node:path';
 import os from 'node:os';
-
 import { getValueByCLIArgs } from "./cli/args.js";
 import {
     FLAG_CONSTANTS,
@@ -35,10 +34,10 @@ const fileManager = async () => {
         const dataString = data.toString().trim();
         let isValidInput = false;
 
-        if (dataString.length >= 2 && dataString.slice(0, 2) === NAVIGATION_CONSTANTS.cd) {
+        if (dataString.length >= 3 && dataString.slice(0, 2) === NAVIGATION_CONSTANTS.cd) {
             isValidInput = true;
             try {
-                pathToCurrentDir = await getNewPathFromCdNavigation(dataString, pathToCurrentDir);
+                pathToCurrentDir = await getNewPathFromCdNavigation(dataString.slice(3), pathToCurrentDir);
             }
             catch(err) {
                 await emitError();
