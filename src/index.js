@@ -1,13 +1,14 @@
 import { stdin, stdout } from 'node:process';
 import path from 'node:path';
 import os from 'node:os';
+
 import { getValueByCLIArgs } from "./cli/args.js";
 import {
     FLAG_CONSTANTS,
     NAVIGATION_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
 } from "./constants.js";
-import { getList } from "./fs/list.js";
+import { printTable } from "./fs/list.js";
 import { getNewPathFromCdNavigation } from './navigation/index.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
@@ -65,8 +66,7 @@ const fileManager = async () => {
             }
             case NAVIGATION_CONSTANTS.ls: {
                 isValidInput = true;
-                const list = await getList(pathToCurrentDir);
-                console.log(list);
+                await printTable(pathToCurrentDir);
             }
             default: {
                if (!isValidInput) stdout.write('Invalid input\n');
