@@ -1,25 +1,23 @@
-import path from 'node:path';
 import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { stat } from 'node:fs/promises';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export const readFileByStreamAPI = async (pathToReadFile) => {
+    try {
+        await stat(pathToReadFile);
+        const readStream = fs.createReadStream(pathToReadFile);
 
-const read = async () => {
-    // Write your code here 
-    const readStream = fs.createReadStream(`${__dirname}/files/fileToRead.txt`, {encoding:'utf-8'});
-
-    readStream.on('data', (chunk) => {
-        process.stdout.write(chunk);
-    })
-
-    readStream.on('end', () => {
-        process.stdout.write('\n');
-    })
-
-    readStream.on('error', (err) => {
-        throw (err);
-    })
+        readStream.on('data', (chunk) => {
+            process.stdout.write(chunk.toString());
+        })
+    
+        readStream.on('end', () => {
+            process.stdout.write('\n');
+        })
+    
+        readStream.on('error', (err) => {
+            throw (err);
+        })
+    } catch(err) {
+        throw err;
+    }
 };
-
-await read();

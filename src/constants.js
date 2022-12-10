@@ -7,6 +7,10 @@ export const NAVIGATION_CONSTANTS = {
     up: 'up',
     cd: 'cd',
     ls: 'ls',
-}
+};
+
+export const FILE_OPERATIONS_CONSTANTS = {
+    cat: 'cat',
+};
 
 export const OPERATION_FAILED_ERROR_TEXT_MESSAGE = 'Operation failed';

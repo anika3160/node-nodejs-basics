@@ -4,12 +4,14 @@ import os from 'node:os';
 
 import { getValueByCLIArgs } from "./cli/args.js";
 import {
+    FILE_OPERATIONS_CONSTANTS,
     FLAG_CONSTANTS,
     NAVIGATION_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
 } from "./constants.js";
 import { printTable } from "./fs/list.js";
-import { getNewPathFromCdNavigation } from './navigation/index.js';
+import { getNewPathFromInput } from './navigation/index.js';
+import { readFileByStreamAPI } from './streams/read.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -38,9 +40,19 @@ const fileManager = async () => {
         if (dataString.length >= 3 && dataString.slice(0, 2) === NAVIGATION_CONSTANTS.cd) {
             isValidInput = true;
             try {
-                pathToCurrentDir = await getNewPathFromCdNavigation(dataString.slice(3), pathToCurrentDir);
+                pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
             }
             catch(err) {
+                await emitError();
+            }
+        }
+
+        if (dataString.length >= 4 && dataString.slice(0,3) === FILE_OPERATIONS_CONSTANTS.cat) {
+            isValidInput = true;
+            try {
+                const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
+                await readFileByStreamAPI(pathToFile);
+            } catch(err) {
                 await emitError();
             }
         }
