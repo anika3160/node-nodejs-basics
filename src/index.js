@@ -61,7 +61,7 @@ const fileManager = async () => {
                     break;
                 }
                 const arrOfDirNames = pathToCurrentDir.split(path.sep);
-                pathToCurrentDir = arrOfDirNames.slice(0, -1).join('/');
+                pathToCurrentDir = arrOfDirNames.slice(0, -1).join(path.sep);
                 break;
             }
             case NAVIGATION_CONSTANTS.ls: {

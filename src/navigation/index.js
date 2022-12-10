@@ -7,7 +7,7 @@ export const getNewPathFromCdNavigation = async (inputPath, pathToCurrentDir) =>
     if (path.isAbsolute(inputPath)) {
         newPathToCurrentDir = inputPath;
     } else {
-        newPathToCurrentDir = path.normalize(pathToCurrentDir + '/' + inputPath);
+        newPathToCurrentDir = path.normalize(pathToCurrentDir + path.sep + inputPath);
     }
    
    try {
