@@ -1,9 +1,4 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const create = async (pathToFile) => {
     try {
@@ -11,6 +6,7 @@ const create = async (pathToFile) => {
     }
     catch (err) {
         await fs.writeFile(pathToFile, '');
+        process.stdout.write('File created.\n');
         return; 
     }
     throw new Error('FS operation failed'); 

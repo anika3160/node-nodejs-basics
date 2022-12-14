@@ -14,6 +14,8 @@ export const FILE_OPERATIONS_CONSTANTS = {
     add: 'add',
     rn: 'rn',
     cp: 'cp',
+    mv: 'mv',
+    rm: 'rm',
 };
 
 export const OPERATION_FAILED_ERROR_TEXT_MESSAGE = 'Operation failed';

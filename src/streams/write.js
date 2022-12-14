@@ -6,7 +6,7 @@ import { stdin } from 'node:process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const writeToFileUsingStreamAPI = async (pathToFileForWrite = `${__dirname}/files/fileToWrite.txt`, dataForAdd) => {
+export const writeToFileUsingStreamAPI = async (pathToFileForWrite, dataForAdd) => {
     const writeStream = fs.createWriteStream(pathToFileForWrite);
 
     if (dataForAdd) {
@@ -16,9 +16,6 @@ export const writeToFileUsingStreamAPI = async (pathToFileForWrite = `${__dirnam
 
         stdin.on('data', (data) => {
             writeStream.write(data.toString());
-        })
-        stdin.on('error', (err) => {
-            throw (err);
         })
     }
 };

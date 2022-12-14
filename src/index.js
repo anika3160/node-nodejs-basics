@@ -1,6 +1,7 @@
 import { stdin, stdout } from 'node:process';
 import path from 'node:path';
 import os from 'node:os';
+import fs from 'node:fs/promises';
 
 import { getValueByCLIArgs } from "./cli/args.js";
 import {
@@ -10,11 +11,13 @@ import {
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
 } from "./constants.js";
 import { printTable } from "./fs/list.js";
-import { getNewPathFromInput } from './navigation/index.js';
+import { getNewPathFromInput, isPathExist, getLastNameFromPath } from './path.js';
 import { readFileByStreamAPI } from './streams/read.js';
 import { writeToFileUsingStreamAPI } from './streams/write.js';
 import { copyFileByStreamAPI } from './streams/copy.js';
 import rename from './fs/rename.js';
+import deleteFile from './fs/delete.js';
+import createFile from './fs/create.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -56,12 +59,13 @@ const fileManager = async () => {
             }
             case NAVIGATION_CONSTANTS.cd: {
                 try {
-                    pathFromInput = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
-                    const stat = await fs.lstat(pathToCurrentDir);
+                    const pathFromInput = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const stat = await fs.lstat(pathFromInput);
+
                     if (stat.isDirectory()) {
                         pathToCurrentDir = pathFromInput;
                     } else {
-                        throw err;
+                        throw new Error (`${pathFromInput} is not a directory.`);
                     }
                 }
                 catch(err) {
@@ -76,7 +80,12 @@ const fileManager = async () => {
             case FILE_OPERATIONS_CONSTANTS.cat: {
                 try {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
-                    await readFileByStreamAPI(pathToFile);
+                    const stat = await fs.lstat(pathToFile);
+                    if (stat.isFile()) {
+                        await readFileByStreamAPI(pathToFile);
+                    } else {
+                        throw new Error (`${pathFromInput} is not a file.`);
+                    }
                 } catch(err) {
                     await emitError();
                 }
@@ -85,7 +94,7 @@ const fileManager = async () => {
             case FILE_OPERATIONS_CONSTANTS.add: {
                 try {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir, true);
-                    await writeToFileUsingStreamAPI(pathToFile, '');
+                    await createFile(pathToFile);
                 } catch(err) {
                     await emitError();
                 }
@@ -103,9 +112,31 @@ const fileManager = async () => {
             }
             case FILE_OPERATIONS_CONSTANTS.cp: {
                 try {
-                    const pathToFileForRead = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToReadFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToNewDir = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    const fileName = getLastNameFromPath(pathToReadFile);
+
+                    await copyFileByStreamAPI(pathToReadFile, pathToNewDir, fileName);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case FILE_OPERATIONS_CONSTANTS.mv: {
+                try {
+                    const pathToFileForMove = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
-                    await copyFileByStreamAPI(pathToFileForRead, pathToNewFile);
+                    await copyFileByStreamAPI(pathToFileForMove, pathToNewFile);
+                    await deleteFile(pathToFileForMove);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case FILE_OPERATIONS_CONSTANTS.rm: {
+                try {
+                    const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    await deleteFile(pathToFile);
                 } catch(err) {
                     await emitError();
                 }

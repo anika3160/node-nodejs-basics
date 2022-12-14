@@ -7,10 +7,11 @@ const rename = async (pathToWrongFileName, newPath) => {
     }
     catch (err) {
         if (err.message === 'FS operation failed') {
-            throw err
+            throw err;
         }
     }
     await fs.rename(pathToWrongFileName, newPath);
+    process.stdout.write('File renamed.\n');
 };
 
 export default rename;
