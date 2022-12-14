@@ -12,6 +12,7 @@ import {
 import { printTable } from "./fs/list.js";
 import { getNewPathFromInput } from './navigation/index.js';
 import { readFileByStreamAPI } from './streams/read.js';
+import { writeToFileUsingStreamAPI } from './streams/write.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -52,6 +53,16 @@ const fileManager = async () => {
             try {
                 const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
                 await readFileByStreamAPI(pathToFile);
+            } catch(err) {
+                await emitError();
+            }
+        }
+
+        if (dataString.length >= 4 && dataString.slice(0,3) === FILE_OPERATIONS_CONSTANTS.add) {
+            isValidInput = true;
+            try {
+                const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
+                await writeToFileUsingStreamAPI(pathToFile, '');
             } catch(err) {
                 await emitError();
             }

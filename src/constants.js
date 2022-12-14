@@ -11,6 +11,7 @@ export const NAVIGATION_CONSTANTS = {
 
 export const FILE_OPERATIONS_CONSTANTS = {
     cat: 'cat',
+    add: 'add',
 };
 
 export const OPERATION_FAILED_ERROR_TEXT_MESSAGE = 'Operation failed';

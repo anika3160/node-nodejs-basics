@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export const getNewPathFromInput = async (inputPath, pathToCurrentDir) => {
+export const getNewPathFromInput = async (inputPath, pathToCurrentDir, isNewPath) => {
     let newPath;
 
     if (path.isAbsolute(inputPath)) {
@@ -10,11 +10,7 @@ export const getNewPathFromInput = async (inputPath, pathToCurrentDir) => {
         newPath = path.normalize(pathToCurrentDir + path.sep + inputPath);
     }
    
-   try {
-        await fs.stat(newPath);
-    } catch(err) {
-        throw err;
-    }
+    if (!isNewPath) await fs.stat(newPath);
 
     return newPath;
 }

@@ -6,18 +6,19 @@ import { stdin } from 'node:process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const write = async () => {
-    // Write your code here 
-    const writeStream = fs.createWriteStream(`${__dirname}/files/fileToWrite.txt`);
-    console.log('Write something, and I print it into the file: (If you are tired, press Ctrl+C)')
+export const writeToFileUsingStreamAPI = async (pathToFileForWrite = `${__dirname}/files/fileToWrite.txt`, dataForAdd) => {
+    const writeStream = fs.createWriteStream(pathToFileForWrite);
 
-    stdin.on('data', (data) => {
-        writeStream.write(data.toString());
-      //  process.exit();
-    })
-    stdin.on('error', (err) => {
-        throw (err);
-    })
+    if (dataForAdd) {
+        writeStream.write(dataForAdd.toString());
+    } else {
+        console.log(`Write something, and I print it into the file(${pathToFileForWrite}): (If you are tired, press Ctrl+C)`)
+
+        stdin.on('data', (data) => {
+            writeStream.write(data.toString());
+        })
+        stdin.on('error', (err) => {
+            throw (err);
+        })
+    }
 };
-
-await write();
