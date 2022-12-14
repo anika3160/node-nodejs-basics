@@ -36,47 +36,54 @@ const fileManager = async () => {
 
     stdin.on('data', async (data) => {
         const dataString = data.toString().trim();
+        const command = dataString.split(' ')[0];
+
         let isValidInput = false;
 
-        if (dataString.length >= 3 && dataString.slice(0, 2) === NAVIGATION_CONSTANTS.cd) {
-            isValidInput = true;
-            try {
-                pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
+        switch (command) {
+            case NAVIGATION_CONSTANTS.cd: {
+                isValidInput = true;
+                try {
+                    pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
+                }
+                catch(err) {
+                    await emitError();
+                }
+                break;
             }
-            catch(err) {
-                await emitError();
-            }
-        }
 
-        if (dataString.length >= 4 && dataString.slice(0,3) === FILE_OPERATIONS_CONSTANTS.cat) {
-            isValidInput = true;
-            try {
-                const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
-                await readFileByStreamAPI(pathToFile);
-            } catch(err) {
-                await emitError();
+            case FILE_OPERATIONS_CONSTANTS.cat: {
+                isValidInput = true;
+                try {
+                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
+                    await readFileByStreamAPI(pathToFile);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
             }
-        }
 
-        if (dataString.length >= 4 && dataString.slice(0,3) === FILE_OPERATIONS_CONSTANTS.add) {
-            isValidInput = true;
-            try {
-                const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
-                await writeToFileUsingStreamAPI(pathToFile, '');
-            } catch(err) {
-                await emitError();
+            case FILE_OPERATIONS_CONSTANTS.add: {
+                isValidInput = true;
+                try {
+                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
+                    await writeToFileUsingStreamAPI(pathToFile, '');
+                } catch(err) {
+                    await emitError();
+                }
+                break;
             }
-        }
 
-        switch (dataString) {
             case NAVIGATION_CONSTANTS.exit: {
                 await printGoodbyeMsg();
             }
+
             case 'error': {
                 isValidInput = true;
                 await emitError();
                 break;
             }
+
             case NAVIGATION_CONSTANTS.up: {
                 isValidInput = true;
                 if (pathToCurrentDir === os.homedir()) {
@@ -87,10 +94,12 @@ const fileManager = async () => {
                 pathToCurrentDir = arrOfDirNames.slice(0, -1).join(path.sep);
                 break;
             }
+
             case NAVIGATION_CONSTANTS.ls: {
                 isValidInput = true;
                 await printTable(pathToCurrentDir);
             }
+
             default: {
                if (!isValidInput) stdout.write('Invalid input\n');
             }
