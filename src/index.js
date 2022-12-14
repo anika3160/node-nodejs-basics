@@ -39,45 +39,9 @@ const fileManager = async () => {
         const command = dataString.split(' ')[0];
 
         switch (command) {
-            case NAVIGATION_CONSTANTS.cd: {
-                try {
-                    pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
-                }
-                catch(err) {
-                    await emitError();
-                }
-                break;
-            }
-
-            case FILE_OPERATIONS_CONSTANTS.cat: {
-                try {
-                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
-                    await readFileByStreamAPI(pathToFile);
-                } catch(err) {
-                    await emitError();
-                }
-                break;
-            }
-
-            case FILE_OPERATIONS_CONSTANTS.add: {
-                try {
-                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
-                    await writeToFileUsingStreamAPI(pathToFile, '');
-                } catch(err) {
-                    await emitError();
-                }
-                break;
-            }
-
             case NAVIGATION_CONSTANTS.exit: {
                 await printGoodbyeMsg();
             }
-
-            case 'error': {
-                await emitError();
-                break;
-            }
-
             case NAVIGATION_CONSTANTS.up: {
                 if (pathToCurrentDir === os.homedir()) {
                     await emitError();
@@ -87,12 +51,37 @@ const fileManager = async () => {
                 pathToCurrentDir = arrOfDirNames.slice(0, -1).join(path.sep);
                 break;
             }
-
+            case NAVIGATION_CONSTANTS.cd: {
+                try {
+                    pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
+                }
+                catch(err) {
+                    await emitError();
+                }
+                break;
+            }
             case NAVIGATION_CONSTANTS.ls: {
                 await printTable(pathToCurrentDir);
                 break;
             }
-
+            case FILE_OPERATIONS_CONSTANTS.cat: {
+                try {
+                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
+                    await readFileByStreamAPI(pathToFile);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case FILE_OPERATIONS_CONSTANTS.add: {
+                try {
+                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
+                    await writeToFileUsingStreamAPI(pathToFile, '');
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
             default: {
                 stdout.write('Invalid input\n');
             }
