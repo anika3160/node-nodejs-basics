@@ -13,6 +13,7 @@ import { printTable } from "./fs/list.js";
 import { getNewPathFromInput } from './navigation/index.js';
 import { readFileByStreamAPI } from './streams/read.js';
 import { writeToFileUsingStreamAPI } from './streams/write.js';
+import { copyFileByStreamAPI } from './streams/copy.js';
 import rename from './fs/rename.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
@@ -55,7 +56,13 @@ const fileManager = async () => {
             }
             case NAVIGATION_CONSTANTS.cd: {
                 try {
-                    pathToCurrentDir = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    pathFromInput = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const stat = await fs.lstat(pathToCurrentDir);
+                    if (stat.isDirectory()) {
+                        pathToCurrentDir = pathFromInput;
+                    } else {
+                        throw err;
+                    }
                 }
                 catch(err) {
                     await emitError();
@@ -89,6 +96,16 @@ const fileManager = async () => {
                     const pathToFileForRename = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
                     await rename(pathToFileForRename, pathToNewFile);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case FILE_OPERATIONS_CONSTANTS.cp: {
+                try {
+                    const pathToFileForRead = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    await copyFileByStreamAPI(pathToFileForRead, pathToNewFile);
                 } catch(err) {
                     await emitError();
                 }

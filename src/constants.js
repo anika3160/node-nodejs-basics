@@ -13,6 +13,7 @@ export const FILE_OPERATIONS_CONSTANTS = {
     cat: 'cat',
     add: 'add',
     rn: 'rn',
+    cp: 'cp',
 };
 
 export const OPERATION_FAILED_ERROR_TEXT_MESSAGE = 'Operation failed';
