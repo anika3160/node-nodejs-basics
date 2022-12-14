@@ -13,6 +13,7 @@ import { printTable } from "./fs/list.js";
 import { getNewPathFromInput } from './navigation/index.js';
 import { readFileByStreamAPI } from './streams/read.js';
 import { writeToFileUsingStreamAPI } from './streams/write.js';
+import rename from './fs/rename.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -36,7 +37,8 @@ const fileManager = async () => {
 
     stdin.on('data', async (data) => {
         const dataString = data.toString().trim();
-        const command = dataString.split(' ')[0];
+        const dataStringArgs = dataString.split(' ');
+        const command = dataStringArgs[0];
 
         switch (command) {
             case NAVIGATION_CONSTANTS.exit: {
@@ -53,7 +55,7 @@ const fileManager = async () => {
             }
             case NAVIGATION_CONSTANTS.cd: {
                 try {
-                    pathToCurrentDir = await getNewPathFromInput(dataString.slice(3), pathToCurrentDir);
+                    pathToCurrentDir = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                 }
                 catch(err) {
                     await emitError();
@@ -66,7 +68,7 @@ const fileManager = async () => {
             }
             case FILE_OPERATIONS_CONSTANTS.cat: {
                 try {
-                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir);
+                    const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     await readFileByStreamAPI(pathToFile);
                 } catch(err) {
                     await emitError();
@@ -75,8 +77,18 @@ const fileManager = async () => {
             }
             case FILE_OPERATIONS_CONSTANTS.add: {
                 try {
-                    const pathToFile = await getNewPathFromInput(dataString.slice(4), pathToCurrentDir, true);
+                    const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir, true);
                     await writeToFileUsingStreamAPI(pathToFile, '');
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case FILE_OPERATIONS_CONSTANTS.rn: {
+                try {
+                    const pathToFileForRename = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    await rename(pathToFileForRename, pathToNewFile);
                 } catch(err) {
                     await emitError();
                 }
