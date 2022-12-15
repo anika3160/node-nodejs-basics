@@ -9,6 +9,7 @@ import {
     FLAG_CONSTANTS,
     NAVIGATION_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
+    OPERATING_SYSTEM_CONSTANTS,
 } from "./constants.js";
 import { printTable } from "./fs/list.js";
 import { getNewPathFromInput, isPathExist, getLastNameFromPath } from './path.js';
@@ -18,6 +19,7 @@ import { copyFileByStreamAPI } from './streams/copy.js';
 import rename from './fs/rename.js';
 import deleteFile from './fs/delete.js';
 import createFile from './fs/create.js';
+import { getOSInfo } from './os.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -140,6 +142,10 @@ const fileManager = async () => {
                 } catch(err) {
                     await emitError();
                 }
+                break;
+            }
+            case OPERATING_SYSTEM_CONSTANTS.os: {
+                getOSInfo(dataStringArgs[1]);
                 break;
             }
             default: {

@@ -18,4 +18,13 @@ export const FILE_OPERATIONS_CONSTANTS = {
     rm: 'rm',
 };
 
+export const OPERATING_SYSTEM_CONSTANTS = {
+    os: 'os',
+    EOL: '--EOL',
+    cpus: '--cpus',
+    homedir: '--homedir',
+    username: '--username',
+    architecture: '--architecture',
+};
+
 export const OPERATION_FAILED_ERROR_TEXT_MESSAGE = 'Operation failed';
