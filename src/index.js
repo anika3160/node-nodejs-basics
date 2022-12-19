@@ -19,6 +19,8 @@ import deleteFile from './fs/delete.js';
 import createFile from './fs/create.js';
 import { getOSInfo } from './os.js';
 import calculateHash from './hash/calcHash.js';
+import compress from './zip/compress.js';
+import decompress from './zip/decompress.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -156,6 +158,31 @@ const fileManager = async () => {
                 }
                 break;
             }
+            case COMMAND_CONSTANTS.compress: {
+                try {
+                    //compress path_to_file path_to_destination
+                    //.txt.br
+                    const pathToCompressFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    await compress(pathToCompressFile, pathToNewFile);
+                } catch(err) {
+                    await emitError();
+                }
+                break;
+            }
+            case COMMAND_CONSTANTS.decompress: {
+                try {
+                    //decompress path_to_file path_to_destination
+                    const pathToDecompressFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    const pathToOriginalFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    await decompress(pathToDecompressFile, pathToOriginalFile);
+                } catch(err) {
+                    console.log(err)
+                    await emitError();
+                }
+                break;
+            }
+
             default: {
                 stdout.write('Invalid input\n');
             }

@@ -15,6 +15,8 @@ export const COMMAND_CONSTANTS = {
     rm: 'rm',
     os: 'os',
     hash: 'hash',
+    compress: 'compress',
+    decompress: 'decompress',
 };
 
 export const OPERATING_SYSTEM_CONSTANTS = {

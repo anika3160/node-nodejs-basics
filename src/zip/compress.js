@@ -1,40 +1,26 @@
-import path from 'node:path';
 import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
-import { promisify } from 'node:util';
+import { access } from 'node:fs/promises';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-const compress = async () => {
-    // Write your code here 
-    const pathToCompressFile = `${__dirname}/files/fileToCompress.txt`;
-    const pathToArchive = `${__dirname}/files/archive.gz`;
-    const prAccess = promisify(fs.access);
+const compress = async (pathToCompressFile, pathToDestination) => {
+    await access(pathToCompressFile, fs.constants.F_OK);
+    const readStream = fs.createReadStream(pathToCompressFile, {encoding:'utf-8'});
+    const writeStream = fs.createWriteStream(pathToDestination);
+    const compressStream = zlib.createBrotliCompress();
 
-    try {
-        await prAccess(pathToCompressFile, fs.constants.F_OK);
-        const readStream = fs.createReadStream(pathToCompressFile, {encoding:'utf-8'});
-        const writeStream = fs.createWriteStream(pathToArchive);
-        const compressStream = zlib.createGzip();
+    const stream = readStream.pipe(compressStream).pipe(writeStream);
     
-        const handleError = (err) => {
-            console.log(err);
-            readStream.destroy();
-            writeStream.end('Finished with error.');
-        }
+    const handleError = (err) => {
+        console.log(err);
+        stream.destroy();
+    }
     
-        readStream
-            .on('error', handleError)
-            .pipe(compressStream)
-            .on('error', handleError)
-            .pipe(writeStream)
-            .on('error', handleError)
-    }
-    catch (err) {
-        throw err
-    }
+    stream.on('finish', () => {
+        console.log('File created.');
+    });
+
+    stream.on('error', handleError);
 };
 
-await compress();
+export default compress;
