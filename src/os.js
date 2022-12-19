@@ -29,7 +29,7 @@ export const getOSInfo = (command) => {
             break;
         }
         default: {
-            stdout.write('Invalid input\n');
+            process.stdout.write('Invalid input\n');
         }
     }
 }
