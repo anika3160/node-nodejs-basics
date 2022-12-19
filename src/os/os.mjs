@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { OPERATING_SYSTEM_CONSTANTS } from "./constants.js";
+import { OPERATING_SYSTEM_CONSTANTS } from "../constants/index.mjs";
 
 export const getOSInfo = (command) => {
     switch (command) {

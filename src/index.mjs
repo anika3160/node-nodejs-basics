@@ -3,29 +3,28 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 
-import { getValueByCLIArgs } from "./cli/args.js";
+import { getValueByCLIArgs } from "./cli/args.mjs";
 import {
     COMMAND_CONSTANTS,
     FLAG_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
-} from "./constants.js";
-import { printTable } from "./fs/list.js";
-import { getNewPathFromInput, isPathExist, getLastNameFromPath } from './path.js';
-import { readFileByStreamAPI } from './streams/read.js';
-import { writeToFileUsingStreamAPI } from './streams/write.js';
-import { copyFileByStreamAPI } from './streams/copy.js';
-import rename from './fs/rename.js';
-import deleteFile from './fs/delete.js';
-import createFile from './fs/create.js';
-import { getOSInfo } from './os.js';
-import calculateHash from './hash/calcHash.js';
-import compress from './zip/compress.js';
-import decompress from './zip/decompress.js';
+} from "./constants/index.mjs";
+import { printTable } from "./fs/list.mjs";
+import { getNewPathFromInput, getLastNameFromPath, getUpPath } from './cli/path.mjs';
+import { readFileByStreamAPI } from './streams/read.mjs';
+import { copyFileByStreamAPI } from './streams/copy.mjs';
+import rename from './fs/rename.mjs';
+import deleteFile from './fs/delete.mjs';
+import createFile from './fs/create.mjs';
+import { getOSInfo } from './os/os.mjs';
+import calculateHash from './hash/calcHash.mjs';
+import compress from './zip/compress.mjs';
+import decompress from './zip/decompress.mjs';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
 const printGoodbyeMsg = async () => {
-    stdout.write (`\nThank you for using File Manager, ${username}, goodbye!`);
+    console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
     process.exit();
 } 
 
@@ -56,8 +55,7 @@ const fileManager = async () => {
                     await emitError();
                     break;
                 }
-                const arrOfDirNames = pathToCurrentDir.split(path.sep);
-                pathToCurrentDir = arrOfDirNames.slice(0, -1).join(path.sep);
+                pathToCurrentDir = getUpPath(pathToCurrentDir);
                 break;
             }
             case COMMAND_CONSTANTS.cd: {
@@ -105,8 +103,14 @@ const fileManager = async () => {
             }
             case COMMAND_CONSTANTS.rn: {
                 try {
+                    //rn path_to_file new_filename
                     const pathToFileForRename = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
-                    const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    const newFileName = dataStringArgs[2];
+                    if (path.isAbsolute(newFileName)) {
+                        await emitError();
+                        break;
+                    }
+                    const pathToNewFile = path.resolve(getUpPath(pathToFileForRename), newFileName);
                     await rename(pathToFileForRename, pathToNewFile);
                 } catch(err) {
                     await emitError();
@@ -116,7 +120,7 @@ const fileManager = async () => {
             case COMMAND_CONSTANTS.cp: {
                 try {
                     const pathToReadFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
-                    const pathToNewDir = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
+                    const pathToNewDir = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir);
                     const fileName = getLastNameFromPath(pathToReadFile);
 
                     await copyFileByStreamAPI(pathToReadFile, pathToNewDir, fileName);
@@ -128,9 +132,12 @@ const fileManager = async () => {
             case COMMAND_CONSTANTS.mv: {
                 try {
                     const pathToFileForMove = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
-                    const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
-                    await copyFileByStreamAPI(pathToFileForMove, pathToNewFile);
-                    await deleteFile(pathToFileForMove);
+                    const pathToNewDir = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir);
+                    const fileName = getLastNameFromPath(pathToFileForMove);
+
+                    await copyFileByStreamAPI(pathToFileForMove, pathToNewDir, fileName, true);
+                    await deleteFile(pathToFileForMove, true);
+                    process.stdout.write(`${pathToFileForMove} file moved.\n`)
                 } catch(err) {
                     await emitError();
                 }
@@ -161,7 +168,7 @@ const fileManager = async () => {
             case COMMAND_CONSTANTS.compress: {
                 try {
                     //compress path_to_file path_to_destination
-                    //.txt.br
+                    //.[txt].br
                     const pathToCompressFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
                     await compress(pathToCompressFile, pathToNewFile);
@@ -177,7 +184,6 @@ const fileManager = async () => {
                     const pathToOriginalFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
                     await decompress(pathToDecompressFile, pathToOriginalFile);
                 } catch(err) {
-                    console.log(err)
                     await emitError();
                 }
                 break;

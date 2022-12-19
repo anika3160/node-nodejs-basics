@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { getElTypeFromPath } from '../cli/path.mjs';
+
 export const getList = async (pathToDir) => {
     try {
         const files = await fs.readdir(pathToDir, {encoding: 'utf-8'});
@@ -10,16 +12,6 @@ export const getList = async (pathToDir) => {
         throw new Error('FS operation failed');
     }
 };
-
-const getElTypeFromPath = async (pathToEl) => {
-    let isDir, isFile = false;
-    const stat = await fs.lstat(pathToEl);
-    isDir = stat.isDirectory();
-    if (isDir) return 'directory';
-    isFile = stat.isFile();
-    if (isFile) return 'file';
-    return undefined;
-}
 
 export const printTable = async (pathToCurrentDir) => {
     const list = await getList(pathToCurrentDir);
