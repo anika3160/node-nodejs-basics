@@ -5,11 +5,9 @@ import fs from 'node:fs/promises';
 
 import { getValueByCLIArgs } from "./cli/args.js";
 import {
-    FILE_OPERATIONS_CONSTANTS,
+    COMMAND_CONSTANTS,
     FLAG_CONSTANTS,
-    NAVIGATION_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
-    OPERATING_SYSTEM_CONSTANTS,
 } from "./constants.js";
 import { printTable } from "./fs/list.js";
 import { getNewPathFromInput, isPathExist, getLastNameFromPath } from './path.js';
@@ -47,10 +45,10 @@ const fileManager = async () => {
         const command = dataStringArgs[0];
 
         switch (command) {
-            case NAVIGATION_CONSTANTS.exit: {
+            case COMMAND_CONSTANTS.exit: {
                 await printGoodbyeMsg();
             }
-            case NAVIGATION_CONSTANTS.up: {
+            case COMMAND_CONSTANTS.up: {
                 if (pathToCurrentDir === os.homedir()) {
                     await emitError();
                     break;
@@ -59,7 +57,7 @@ const fileManager = async () => {
                 pathToCurrentDir = arrOfDirNames.slice(0, -1).join(path.sep);
                 break;
             }
-            case NAVIGATION_CONSTANTS.cd: {
+            case COMMAND_CONSTANTS.cd: {
                 try {
                     const pathFromInput = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const stat = await fs.lstat(pathFromInput);
@@ -75,11 +73,11 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case NAVIGATION_CONSTANTS.ls: {
+            case COMMAND_CONSTANTS.ls: {
                 await printTable(pathToCurrentDir);
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.cat: {
+            case COMMAND_CONSTANTS.cat: {
                 try {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const stat = await fs.lstat(pathToFile);
@@ -93,7 +91,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.add: {
+            case COMMAND_CONSTANTS.add: {
                 try {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir, true);
                     await createFile(pathToFile);
@@ -102,7 +100,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.rn: {
+            case COMMAND_CONSTANTS.rn: {
                 try {
                     const pathToFileForRename = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
@@ -112,7 +110,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.cp: {
+            case COMMAND_CONSTANTS.cp: {
                 try {
                     const pathToReadFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewDir = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
@@ -124,7 +122,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.mv: {
+            case COMMAND_CONSTANTS.mv: {
                 try {
                     const pathToFileForMove = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
@@ -135,7 +133,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case FILE_OPERATIONS_CONSTANTS.rm: {
+            case COMMAND_CONSTANTS.rm: {
                 try {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     await deleteFile(pathToFile);
@@ -144,7 +142,7 @@ const fileManager = async () => {
                 }
                 break;
             }
-            case OPERATING_SYSTEM_CONSTANTS.os: {
+            case COMMAND_CONSTANTS.os: {
                 getOSInfo(dataStringArgs[1]);
                 break;
             }
