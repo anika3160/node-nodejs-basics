@@ -18,6 +18,7 @@ import rename from './fs/rename.js';
 import deleteFile from './fs/delete.js';
 import createFile from './fs/create.js';
 import { getOSInfo } from './os.js';
+import calculateHash from './hash/calcHash.js';
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -144,6 +145,15 @@ const fileManager = async () => {
             }
             case COMMAND_CONSTANTS.os: {
                 getOSInfo(dataStringArgs[1]);
+                break;
+            }
+            case COMMAND_CONSTANTS.hash: {
+                try {
+                    const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
+                    await calculateHash(pathToFile);
+                } catch(err) {
+                    await emitError();
+                }
                 break;
             }
             default: {

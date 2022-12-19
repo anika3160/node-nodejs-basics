@@ -14,6 +14,7 @@ export const COMMAND_CONSTANTS = {
     mv: 'mv',
     rm: 'rm',
     os: 'os',
+    hash: 'hash',
 };
 
 export const OPERATING_SYSTEM_CONSTANTS = {
