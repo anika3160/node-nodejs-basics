@@ -51,7 +51,7 @@ const fileManager = async () => {
                 await printGoodbyeMsg();
             }
             case COMMAND_CONSTANTS.up: {
-                if (pathToCurrentDir === os.homedir()) {
+                if (pathToCurrentDir === path.parse(pathToCurrentDir).root) {
                     await emitError();
                     break;
                 }
