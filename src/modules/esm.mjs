@@ -4,7 +4,7 @@ import { release, version } from 'node:os';
 import { createServer as createServerHttp } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import ('./files/c.js');
+import ('./files/c.cjs');
 
 const prReadFile = promisify(fs.readFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -12,17 +12,9 @@ const __dirname = path.dirname(__filename);
 
 const random = Math.random();
 
-let unknownObject;
-try {
-    if (random > 0.5) {
-        unknownObject = JSON.parse(await prReadFile(`${__dirname}/files/a.json`));
-    } else {
-        unknownObject = JSON.parse(await prReadFile(`${__dirname}/files/b.json`));
-    }
-}
-catch (err) {
-    throw err
-}
+const unknownObject = random > 0.5
+    ? JSON.parse(await prReadFile(`${__dirname}/files/a.json`))
+    : JSON.parse(await prReadFile(`${__dirname}/files/b.json`));
 
 console.log(`Release ${release()}`);
 console.log(`Version ${version()}`);
