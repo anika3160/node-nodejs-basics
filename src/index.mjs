@@ -1,25 +1,25 @@
-import { stdin, stdout } from 'node:process';
-import path from 'node:path';
-import os from 'node:os';
-import fs from 'node:fs/promises';
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { stdin, stdout } from 'node:process'
 
-import { getValueByCLIArgs } from "./cli/args.mjs";
+import { getValueByCLIArgs } from "./cli/args.mjs"
+import { getLastNameFromPath, getNewPathFromInput, getUpPath } from './cli/path.mjs'
 import {
     COMMAND_CONSTANTS,
     FLAG_CONSTANTS,
     OPERATION_FAILED_ERROR_TEXT_MESSAGE,
-} from "./constants/index.mjs";
-import { printTable } from "./fs/list.mjs";
-import { getNewPathFromInput, getLastNameFromPath, getUpPath } from './cli/path.mjs';
-import { readFileByStreamAPI } from './streams/read.mjs';
-import { copyFileByStreamAPI } from './streams/copy.mjs';
-import rename from './fs/rename.mjs';
-import deleteFile from './fs/delete.mjs';
-import { createFile, createDirectory } from './fs/create.mjs';
-import { getOSInfo } from './os/os.mjs';
-import calculateHash from './hash/calcHash.mjs';
-import compress from './zip/compress.mjs';
-import decompress from './zip/decompress.mjs';
+} from "./constants/index.mjs"
+import { createDirectory, createFile } from './fs/create.mjs'
+import deleteFile from './fs/delete.mjs'
+import { printTable } from "./fs/list.mjs"
+import rename from './fs/rename.mjs'
+import calculateHash from './hash/calcHash.mjs'
+import { getOSInfo } from './os/os.mjs'
+import { copyFileByStreamAPI } from './streams/copy.mjs'
+import { readFileByStreamAPI } from './streams/read.mjs'
+import compress from './zip/compress.mjs'
+import decompress from './zip/decompress.mjs'
 
 const username = getValueByCLIArgs(FLAG_CONSTANTS.USERNAME_FLAG);
 
@@ -32,27 +32,33 @@ const printCurrentDir = async (pathToCurrentDir = os.homedir()) => {
     stdout.write(`You are currently in ${pathToCurrentDir}\n`);
 }
 
-const emitError = async () => {
-    stdin.emit('error', new Error(OPERATION_FAILED_ERROR_TEXT_MESSAGE + '\n'));
-}
+const emitError = (msg = OPERATION_FAILED_ERROR_TEXT_MESSAGE) =>
+    process.stderr.write(msg + '\n');
 
 const fileManager = async () => {
     let pathToCurrentDir = os.homedir();
     stdout.write(`Welcome to the File Manager, ${username}!\n`);
+    printCurrentDir(pathToCurrentDir);
     process.on('SIGINT', printGoodbyeMsg);
 
     stdin.on('data', async (data) => {
         const dataString = data.toString().trim();
-        const dataStringArgs = dataString.split(' ');
+        const dataStringArgs = dataString
+        .match(/(?:[^\s"]+|"[^"]*")+/g)
+        ?.map((arg) =>
+            arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg
+        ) ?? [];
+
         const command = dataStringArgs[0];
 
         switch (command) {
             case COMMAND_CONSTANTS.exit: {
                 await printGoodbyeMsg();
+                return;
             }
             case COMMAND_CONSTANTS.up: {
                 if (pathToCurrentDir === path.parse(pathToCurrentDir).root) {
-                    await emitError();
+                    emitError();
                     break;
                 }
                 pathToCurrentDir = getUpPath(pathToCurrentDir);
@@ -70,12 +76,16 @@ const fileManager = async () => {
                     }
                 }
                 catch(err) {
-                    await emitError();
+                    emitError();
                 }
                 break;
             }
             case COMMAND_CONSTANTS.ls: {
-                await printTable(pathToCurrentDir);
+                try {
+                    await printTable(pathToCurrentDir);
+                } catch(err) {
+                    emitError();
+                }
                 break;
             }
             case COMMAND_CONSTANTS.cat: {
@@ -85,10 +95,10 @@ const fileManager = async () => {
                     if (stat.isFile()) {
                         await readFileByStreamAPI(pathToFile);
                     } else {
-                        throw new Error (`${pathFromInput} is not a file.`);
+                        throw new Error (`${pathToFile} is not a file.`);
                     }
                 } catch(err) {
-                    await emitError();
+                    emitError();
                 }
                 break;
             }
@@ -97,7 +107,7 @@ const fileManager = async () => {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir, true);
                     await createFile(pathToFile);
                 } catch(err) {
-                    await emitError();
+                    emitError();
                 }
                 break;
             }
@@ -106,7 +116,7 @@ const fileManager = async () => {
                     const pathToDir = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir, true);
                     await createDirectory(pathToDir);
                 } catch(err) {
-                    await emitError();
+                    emitError();
                 }
                 break;
             }
@@ -116,13 +126,13 @@ const fileManager = async () => {
                     const pathToFileForRename = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     const newFileName = dataStringArgs[2];
                     if (path.isAbsolute(newFileName)) {
-                        await emitError();
+                        emitError();
                         break;
                     }
                     const pathToNewFile = path.resolve(getUpPath(pathToFileForRename), newFileName);
                     await rename(pathToFileForRename, pathToNewFile);
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
@@ -134,7 +144,7 @@ const fileManager = async () => {
 
                     await copyFileByStreamAPI(pathToReadFile, pathToNewDir, fileName);
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
@@ -148,7 +158,7 @@ const fileManager = async () => {
                     await deleteFile(pathToFileForMove, true);
                     process.stdout.write(`${pathToFileForMove} file moved.\n`)
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
@@ -157,7 +167,7 @@ const fileManager = async () => {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     await deleteFile(pathToFile);
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
@@ -170,7 +180,7 @@ const fileManager = async () => {
                     const pathToFile = await getNewPathFromInput(dataStringArgs[1], pathToCurrentDir);
                     await calculateHash(pathToFile);
                 } catch(err) {
-                    await emitError();
+                    emitError();
                 }
                 break;
             }
@@ -182,7 +192,7 @@ const fileManager = async () => {
                     const pathToNewFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
                     await compress(pathToCompressFile, pathToNewFile);
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
@@ -193,7 +203,7 @@ const fileManager = async () => {
                     const pathToOriginalFile = await getNewPathFromInput(dataStringArgs[2], pathToCurrentDir, true);
                     await decompress(pathToDecompressFile, pathToOriginalFile);
                 } catch(err) {
-                    await emitError();
+                    emitError
                 }
                 break;
             }
