@@ -6,7 +6,7 @@ import { access } from 'node:fs/promises';
 const compress = async (pathToCompressFile, pathToDestination) => {
     await access(pathToCompressFile, fs.constants.F_OK);
     return new Promise((resolve, reject) => {
-        const readStream = fs.createReadStream(pathToCompressFile, {encoding:'utf-8'});
+        const readStream = fs.createReadStream(pathToCompressFile);
         const writeStream = fs.createWriteStream(pathToDestination);
         const compressStream = zlib.createBrotliCompress();
     
